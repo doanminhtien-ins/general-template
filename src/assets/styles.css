@@ -1,0 +1,30 @@
+.mt-4 {
+  margin-top: 2pem;
+}
+
+.mt-2 {
+  margin-top: 1pem;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.ui.selection.dropdown {
+  min-height: 2.3em !important;
+  line-height: 1.5em !important;
+  padding: .22619048em 2.1em .22619048em .35714286em !important;
+}
+
+.ui.selection.dropdown input.search {
+  margin: .2em 0 .2em .3em !important;
+  padding: 0 !important;
+}
+
+.ui.multiple.search.dropdown .text {
+  margin: .2em 0 .2em .3em !important;
+}
+
+.ui.selection.dropdown>.delete.icon, .ui.selection.dropdown>.dropdown.icon, .ui.selection.dropdown>.search.icon {
+  top: 0.6em !important;
+}
