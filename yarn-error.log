@@ -29,7 +29,7 @@ Trace:
 npm manifest: 
   {
     "name": "general-template",
-    "version": "1.0.5",
+    "version": "1.0.8",
     "description": "Translate docx template with key terms to completed one by providing a form to fill in the info",
     "author": "doanminhtien-ins",
     "license": "MIT",

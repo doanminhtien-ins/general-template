@@ -317,7 +317,8 @@ class DocxTemplateHelper {
         } else if (
           realField.type === FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value ||
           realField.type === FILE_TEMPLATE_FIELD_TYPES.FIXED_TEXT.value ||
-          realField.type === FILE_TEMPLATE_FIELD_TYPES.FIXED_DATE.value
+          realField.type === FILE_TEMPLATE_FIELD_TYPES.FIXED_DATE.value ||
+          realField.type === FILE_TEMPLATE_FIELD_TYPES.SINGLE_CHOICE_OPTION.value
         ) {
           realValue = realField.value
         }

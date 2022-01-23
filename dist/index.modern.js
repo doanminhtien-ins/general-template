@@ -6,7 +6,7 @@ import PizZip from 'pizzip';
 import JSZipUtils from 'jszip-utils';
 import Docxtemplater from 'docxtemplater';
 import expressions from 'angular-expressions';
-import { Form, Container, Row, Col, InputGroup, Alert, Button } from 'react-bootstrap';
+import { Form, Container, Row, Col, Alert, Button } from 'react-bootstrap';
 import { Dropdown } from 'semantic-ui-react';
 import DatePicker from 'react-datepicker';
 import moment$1 from 'moment';
@@ -1608,6 +1608,8 @@ var DocxTemplateHelper = /*#__PURE__*/function () {
 
           var savedField = cSavedValues[fieldName];
           var realField = savedField || templateField;
+          console.log('fieldName', fieldName);
+          console.log('realField', realField);
           var realValue = '';
           var type = templateField ? templateField.type : FILE_TEMPLATE_FIELD_TYPES.FIXED_TEXT.value;
           var importance = templateField ? templateField.importance : realField ? realField.importance : FIELD_IMPORTANCE.LOW.value;
@@ -1618,7 +1620,7 @@ var DocxTemplateHelper = /*#__PURE__*/function () {
             realValue = '';
           } else if (realField.type === FILE_TEMPLATE_FIELD_TYPES.MATCH.value) {
             realValue = _this.getTranslatedValueFromKey(realField.value, valueHolders);
-          } else if (realField.type === FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value || realField.type === FILE_TEMPLATE_FIELD_TYPES.FIXED_TEXT.value || realField.type === FILE_TEMPLATE_FIELD_TYPES.FIXED_DATE.value) {
+          } else if (realField.type === FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value || realField.type === FILE_TEMPLATE_FIELD_TYPES.FIXED_TEXT.value || realField.type === FILE_TEMPLATE_FIELD_TYPES.FIXED_DATE.value || realField.type === FILE_TEMPLATE_FIELD_TYPES.SINGLE_CHOICE_OPTION.value) {
             realValue = realField.value;
           }
 
@@ -3358,6 +3360,7 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
     _this.hookFieldGenerate = function (fieldName, value) {};
 
     _this.renderFields = function (fields) {
+      console.log('fields', fields);
       return fields.map(function (field) {
         return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(GenerateFormField, {
           hookFieldUpdate: _this.hookFieldGenerate,
@@ -3443,15 +3446,16 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
         disabled: isLoading,
         onClick: this.props.onClose
       }, ' ', "Close"));
+      var hiddenFieldsArr = Object.entries(this.state.hideableFields);
       content = /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Form, {
         name: "generateTestTemplateForm"
-      }, /*#__PURE__*/React.createElement(Container, null, /*#__PURE__*/React.createElement(Row, null, /*#__PURE__*/React.createElement(Col, null, !!this.props.injectedFieldsBefore && this.props.injectedFieldsBefore, this.renderFields(docFields), Object.entries(this.state.hideableFields).length > 0 && /*#__PURE__*/React.createElement(Form.Field, null, /*#__PURE__*/React.createElement("label", null, "Optional Clauses"), Object.entries(this.state.hideableFields).map(function (field) {
+      }, /*#__PURE__*/React.createElement(Container, null, /*#__PURE__*/React.createElement(Row, null, /*#__PURE__*/React.createElement(Col, null, !!this.props.injectedFieldsBefore && this.props.injectedFieldsBefore, this.renderFields(docFields), hiddenFieldsArr.length > 0 && /*#__PURE__*/React.createElement(Form.Group, null, /*#__PURE__*/React.createElement("label", null, "Optional Clauses"), Object.entries(this.state.hideableFields).map(function (field) {
         var _this2$state$hideable;
 
         var fieldName = field[0];
-        return /*#__PURE__*/React.createElement(Form.Field, {
+        return /*#__PURE__*/React.createElement(Form.Group, {
           key: fieldName
-        }, /*#__PURE__*/React.createElement(InputGroup.Checkbox, {
+        }, /*#__PURE__*/React.createElement(Form.Check, {
           checked: ((_this2$state$hideable = _this2.state.hideableFields[fieldName]) === null || _this2$state$hideable === void 0 ? void 0 : _this2$state$hideable.value) !== 1,
           onChange: function onChange() {
             return _this2.handleChangeHidableField(fieldName);

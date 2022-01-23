@@ -164,6 +164,7 @@ class GenerateForm extends Component {
       valueHolders,
       changedValueHolder,
     )
+
     this.setState({
       isLoading: false,
       docFields: {
@@ -408,6 +409,8 @@ class GenerateForm extends Component {
           )}
         </React.Fragment>
       )
+
+      let hiddenFieldsArr = Object.entries(this.state.hideableFields)
   
       content = (
         <React.Fragment>
@@ -417,14 +420,14 @@ class GenerateForm extends Component {
                 <Col>
                   {!!this.props.injectedFieldsBefore && this.props.injectedFieldsBefore}
                   {this.renderFields(docFields)}
-                  {Object.entries(this.state.hideableFields).length > 0 && (
-                    <Form.Field>
+                  {hiddenFieldsArr.length > 0 && (
+                    <Form.Group>
                       <label>Optional Clauses</label>
                       {Object.entries(this.state.hideableFields).map((field) => {
                         const fieldName = field[0]
                         return (
-                          <Form.Field key={fieldName}>
-                            <InputGroup.Checkbox
+                          <Form.Group key={fieldName}>
+                            <Form.Check 
                               checked={this.state.hideableFields[fieldName]?.value !== 1}
                               onChange={() => this.handleChangeHidableField(fieldName)}
                               toggle
@@ -432,10 +435,10 @@ class GenerateForm extends Component {
                                 <label style={{ textTransform: 'capitalize' }}>{fieldName.split('_').join(' ')}</label>
                               }
                             />
-                          </Form.Field>
+                          </Form.Group>
                         )
                       })}
-                    </Form.Field>
+                    </Form.Group>
                   )}
                   {!!this.props.injectedFieldsAfter && this.props.injectedFieldsAfter}
                 </Col>
@@ -450,7 +453,6 @@ class GenerateForm extends Component {
         </React.Fragment>
       )
     }
-
     
     return <div>{content}</div>
   }
