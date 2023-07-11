@@ -1,22 +1,16 @@
-import React, { Component } from 'react'
+import React, { Component, memo } from 'react'
 
 import DocxTemplateHelper, { FILE_TEMPLATE_FIELD_TYPES, FILE_TEMPLATE_AVAILABLE_AUTO_FILLABLE_FIELDS } from '../helpers/docx_template_helpers'
 import {
   Form,
   Button,
   Alert,
-  InputGroup,
   Container,
   Row,
   Col
 } from 'react-bootstrap'
 import GenerateFormField from './generate_form_field'
 import moment from 'moment'
-// import { STARTUP_LOADED_MODULES, MODULE } from '../../../utilities/constant'
-// import UserDropdown from '../../view/user-dropdown'
-// import Search from '../../search'
-// import DatePicker from 'react-datepicker'
-// import 'react-datepicker/dist/react-datepicker.css'
 
 class GenerateForm extends Component {
   constructor(props) {
@@ -52,6 +46,9 @@ class GenerateForm extends Component {
       this.docxTemplateHelper.loadDoc(
         this.props.url,
         (doc) => {
+          this.setState({
+            isLoadingTemplateFailed: false,
+          })
           this.fillValueToFields()
         },
         this.onDocDownloadFailed,
@@ -67,19 +64,6 @@ class GenerateForm extends Component {
         getTemplate()
       },
     )
-    // this.props.getStartup(this.props.testStartupId, STARTUP_LOADED_MODULES.people).then(() => {
-    //   this.setState(
-    //     {
-    //       valueHolders: {
-    //         ...this.state.valueHolders,
-    //         startup: this.props.startups[this.props.testStartupId],
-    //       },
-    //     },
-    //     () => {
-    //       getTemplate()
-    //     },
-    //   )
-    // })
   }
 
   onChangeFieldValue = (name, modifiedValue, translatedValue) => {
@@ -145,9 +129,11 @@ class GenerateForm extends Component {
     }
   }
 
-  downloadFile = () => {
+  downloadFile = (skipDownload = false) => {
     const fieldAndValues = this.fillDoc()
-    this.docxTemplateHelper.createAndDownloadBlobFile(`${this.props.fileName || 'Downloaded_'}_${moment().format('YYYY_MM_DD_HH_mm_ss')}`)
+    if (!skipDownload) {
+      this.docxTemplateHelper.createAndDownloadBlobFile(`${this.props.fileName || 'Downloaded_'}_${moment().format('YYYY_MM_DD_HH_mm_ss')}`)
+    }
     if (this.props.onAfterDownload) {
       this.props.onAfterDownload(fieldAndValues)
     }
@@ -179,155 +165,18 @@ class GenerateForm extends Component {
   }
 
   onDocDownloadFailed = (err) => {
-    console.log('err', err)
     this.setState({
       isLoadingTemplateFailed: true,
       isLoading: false,
     })
   }
 
-  onFieldChanged = (e, { name, value }) => {
-    this.setState({
-      [name]: value,
-    })
-  }
-
-  onInsigniaSignerChanged = (value) => {
-    const valueHolders = {
-      ...this.state.valueHolders,
-      insigniaSigner: value,
-    }
-
-    this.setState({
-      insigniaSignerId: value.id,
-      valueHolders: valueHolders,
-    })
-
-    this.fillValueToFields(null, valueHolders, 'insigniaSigner')
-  }
-
-  onStartupSignerChanged = (value) => {
-    const valueHolders = {
-      ...this.state.valueHolders,
-      startupSigner: value,
-    }
-
-    this.setState({
-      startupSignerId: value.id,
-      valueHolders: valueHolders,
-    })
-
-    this.fillValueToFields(null, valueHolders, 'startupSigner')
-  }
-
-  hookFieldGenerate = (fieldName, value) => {
-    // if (fieldName === 'expired_date') {
-    //   this.expiredDate = value
-    // }
-  }
-
-  // getDealNamePart = () => {
-  //   return this.props.deal ? '-' + this.props.deal.round : ''
-  // }
-
-  // renderInsigniaSignerField = () => {
-  //   return (
-  //     <Form.Field>
-  //       <label>Select Insignia Signer</label>
-  //       <UserDropdown
-  //         placeholder="Signer"
-  //         users={this.props.users}
-  //         value={this.state.insigniaSignerId}
-  //         filterfn={(user) => user.active}
-  //         onChange={(e, { value }) => this.onInsigniaSignerChanged(this.props.users[value])}
-  //       />
-  //     </Form.Field>
-  //   )
-  // }
-
-  // renderStartupSignerField = () => {
-  //   const { people } = this.props.startups[this.props.testStartupId]
-  //   const { showSearchStartupSigner } = this.state
-
-  //   return !people || people.length === 0 || showSearchStartupSigner ? (
-  //     <Form.Field>
-  //       {people.length > 0 && (
-  //         <span
-  //           role="link"
-  //           tabIndex={-1}
-  //           onClick={() => this.setState({ showSearchStartupSigner: false })}
-  //           className="font-9 cursor-pointer"
-  //           style={{ float: 'right', color: 'blue' }}>
-  //           Select Startup Person
-  //         </span>
-  //       )}
-  //       <label>Select Startup Signer</label>
-  //       <Search
-  //         module={MODULE.PERSON}
-  //         showAddButton={false}
-  //         onResultSelect={(e, { result }) => {
-  //           this.onStartupSignerChanged(result)
-  //         }}
-  //       />
-  //     </Form.Field>
-  //   ) : (
-  //     <Form.Field>
-  //       <span
-  //         role="link"
-  //         tabIndex={-1}
-  //         onClick={() => this.setState({ showSearchStartupSigner: true })}
-  //         className="font-9 cursor-pointer text-blue"
-  //         style={{ float: 'right', color: 'blue' }}>
-  //         Search Person
-  //       </span>
-  //       <label>Select Startup Signer</label>
-  //       <Dropdown
-  //         clearable
-  //         fluid
-  //         selection
-  //         search
-  //         options={people.map((person) => {
-  //           return {
-  //             key: 'dropdown_person_' + person.id,
-  //             text: person.name,
-  //             value: person.id,
-  //           }
-  //         })}
-  //         value={this.state.startupSignerId}
-  //         placeholder="Select a person"
-  //         onChange={(e, { value }) => {
-  //           const selectedPerson = people.find((p) => p.id === value)
-  //           this.onStartupSignerChanged({
-  //             id: selectedPerson.id,
-  //             name: selectedPerson.name,
-  //             email: selectedPerson.email,
-  //             position: selectedPerson.position,
-  //           })
-  //         }}
-  //       />
-  //     </Form.Field>
-  //   )
-  // }
+  hookFieldGenerate = (fieldName, value) => {}
 
   renderFields = (fields) => {
-    let generatedInsigniaSignerField = false
-    let generatedStartupSignerField = false
     return fields.map((field) => {
-      let generateInsigniaSignerField = false
-      // if (field.type === FILE_TEMPLATE_FIELD_TYPES.MATCH.value && field.value === INSIGNIA_SIGNER_NAME) {
-      //   generatedInsigniaSignerField = true
-      //   generateInsigniaSignerField = true
-      // }
-
-      let generateStartupSignerField = false
-      // if (field.type === FILE_TEMPLATE_FIELD_TYPES.MATCH.value && field.value === STARTUP_SIGNER_NAME) {
-      //   generatedStartupSignerField = true
-      //   generateStartupSignerField = true
-      // }
       return (
         <React.Fragment>
-          {/* {generateInsigniaSignerField && this.renderInsigniaSignerField()} */}
-          {/* {generateStartupSignerField && this.renderStartupSignerField()} */}
           <GenerateFormField
             hookFieldUpdate={this.hookFieldGenerate}
             key={'field_' + field.name}
@@ -360,14 +209,7 @@ class GenerateForm extends Component {
     let content = null
 
     if (isLoading) {
-      content = 'Loading'
-      // content = (
-      //   <Segment style={{ border: 'none', boxShadow: 'none' }}>
-      //     <Dimmer active inverted>
-      //       <Loader active inline="centered" />
-      //     </Dimmer>
-      //   </Segment>
-      // )
+      content = <div>Loading</div>
     } else if (isLoadingTemplateFailed) {
       content = (
         <Alert variant="danger">
@@ -392,13 +234,22 @@ class GenerateForm extends Component {
         )
       })
 
-      const docFieldsLen = docFields.length
-
       const buttons = (
         <React.Fragment>
+          {this.props.onClose && (
+            <Button className='docx-template__btn-close' disabled={isLoading} color="gray" onClick={() => this.props.onClose()}>
+              Close
+            </Button>
+          )}
+          <div style={{flex: 1}}></div>
           {!isLoading && !isLoadingTemplateFailed && (
-            <Button disabled={errorFields.length > 0 || isLoading || !this.props.canDownload} color="blue" onClick={this.downloadFile} icon>
-              Download
+            <Button className="docx-template__btn-download" disabled={errorFields.length > 0 || isLoading || !this.props.canDownload} color="blue" onClick={this.downloadFile}>
+              Download Docx
+            </Button>
+          )}
+          {!isLoading && !isLoadingTemplateFailed && (
+            <Button className='docx-template__btn-save' disabled={isLoading} color="blue" onClick={() => this.downloadFile(true)}>
+              Save
             </Button>
           )}
           {!(typeof this.props.noModal !== 'undefined') && (
@@ -458,4 +309,4 @@ class GenerateForm extends Component {
   }
 }
 
-export default GenerateForm
+export default memo(GenerateForm)

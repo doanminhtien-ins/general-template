@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import "./assets/styles.css"
 import "bootstrap/dist/css/bootstrap.min.css";
 import 'semantic-ui-css/semantic.min.css'
@@ -14,9 +14,10 @@ interface Props {
   injectedFieldsBefore?: any
   injectedFieldsAfter?: any
   fileName?: string
+  onClose?: () => void
 }
 
-export const DocxTemplate = ({ url, settings, canDownload, onAfterDownload, injectedFieldsBefore, injectedFieldsAfter, fileName }: Props) => {
+export const DocxTemplate = memo(({ url, settings, canDownload, onAfterDownload, injectedFieldsBefore, injectedFieldsAfter, fileName, onClose }: Props) => {
   return <GenerateForm noModal url={url}
     settings={settings}
     canDownload={canDownload}
@@ -24,5 +25,7 @@ export const DocxTemplate = ({ url, settings, canDownload, onAfterDownload, inje
     injectedFieldsBefore={injectedFieldsBefore}
     injectedFieldsAfter={injectedFieldsAfter}
     fileName={fileName}
+    onClose={onClose}
   />
-}
+})
+

@@ -1506,6 +1506,11 @@ var FILE_TEMPLATE_FIELD_TYPES = {
     value: 'country_select',
     text: 'Country Select'
   },
+  COUNTRY_SELECT_SINGLE: {
+    key: 'country_select_single',
+    value: 'country_select_single',
+    text: 'Single Country Select'
+  },
   SINGLE_CHOICE_OPTION: {
     key: 'single_choice_option',
     value: 'single_choice_option',
@@ -1611,8 +1616,6 @@ var DocxTemplateHelper = /*#__PURE__*/function () {
 
           var savedField = cSavedValues[fieldName];
           var realField = savedField || templateField;
-          console.log('fieldName', fieldName);
-          console.log('realField', realField);
           var realValue = '';
           var type = templateField ? templateField.type : FILE_TEMPLATE_FIELD_TYPES.FIXED_TEXT.value;
           var importance = templateField ? templateField.importance : realField ? realField.importance : FIELD_IMPORTANCE.LOW.value;
@@ -1671,6 +1674,7 @@ var DocxTemplateHelper = /*#__PURE__*/function () {
           _this.setDoc(doc);
         } catch (error) {
           callbackFailed(err);
+          return;
         }
 
         callbackSuccess(doc);
@@ -1678,8 +1682,6 @@ var DocxTemplateHelper = /*#__PURE__*/function () {
     };
 
     this.setData = function (data) {
-      console.log('set Data', data);
-
       _this.loadedDoc.setData(data);
 
       _this.loadedDoc.render();
@@ -1691,7 +1693,7 @@ var DocxTemplateHelper = /*#__PURE__*/function () {
       }
 
       var body = _this.loadedDoc.getZip().generate({
-        type: 'nodebuffer'
+        type: 'blob'
       });
 
       var blob = new Blob([body]);
@@ -3130,7 +3132,7 @@ var GenerateFormField = /*#__PURE__*/function (_PureComponent) {
       style: {
         color: 'red'
       }
-    }, "*"))), this.props.type !== FILE_TEMPLATE_FIELD_TYPES.FIXED_DATE.value && this.props.type !== FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value && this.props.type !== FILE_TEMPLATE_FIELD_TYPES.SINGLE_CHOICE_OPTION.value && /*#__PURE__*/React__default.createElement(reactBootstrap.Form.Control, {
+    }, "*"))), this.props.type !== FILE_TEMPLATE_FIELD_TYPES.FIXED_DATE.value && this.props.type !== FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value && this.props.type !== FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT_SINGLE.value && this.props.type !== FILE_TEMPLATE_FIELD_TYPES.SINGLE_CHOICE_OPTION.value && /*#__PURE__*/React__default.createElement(reactBootstrap.Form.Control, {
       value: this.state.value ? this.state.value : '',
       name: this.props.name,
       fluid: true,
@@ -3152,9 +3154,7 @@ var GenerateFormField = /*#__PURE__*/function (_PureComponent) {
         });
       },
       dateFormat: "MMMM dd, yyy"
-    }), this.props.type === FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value &&
-    /*#__PURE__*/
-    React__default.createElement(semanticUiReact.Dropdown, {
+    }), this.props.type === FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value && /*#__PURE__*/React__default.createElement(semanticUiReact.Dropdown, {
       className: "form-control",
       value: this.state.value ? this.state.value.split(', ') : [],
       name: this.props.name,
@@ -3172,6 +3172,28 @@ var GenerateFormField = /*#__PURE__*/function (_PureComponent) {
         var name = _ref2.name,
             value = _ref2.value;
         value = value.join(', ');
+
+        _this2.handleChangeFieldValue(e, {
+          name: name,
+          value: value
+        });
+      }
+    }), this.props.type === FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT_SINGLE.value && /*#__PURE__*/React__default.createElement(semanticUiReact.Dropdown, {
+      className: "form-control",
+      value: this.state.value,
+      name: this.props.name,
+      selection: true,
+      search: true,
+      options: COUNTRY_OPTIONS$1.map(function (c) {
+        return {
+          value: c.text,
+          text: c.text,
+          key: c.key
+        };
+      }),
+      onChange: function onChange(e, _ref3) {
+        var name = _ref3.name,
+            value = _ref3.value;
 
         _this2.handleChangeFieldValue(e, {
           name: name,
@@ -3219,6 +3241,10 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
         _this.docxTemplateHelper.setDefaultFieldValueBuilders(FILE_TEMPLATE_AVAILABLE_AUTO_FILLABLE_FIELDS);
 
         _this.docxTemplateHelper.loadDoc(_this.props.url, function (doc) {
+          _this.setState({
+            isLoadingTemplateFailed: false
+          });
+
           _this.fillValueToFields();
         }, _this.onDocDownloadFailed);
       };
@@ -3278,10 +3304,16 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
       }
     };
 
-    _this.downloadFile = function () {
+    _this.downloadFile = function (skipDownload) {
+      if (skipDownload === void 0) {
+        skipDownload = false;
+      }
+
       var fieldAndValues = _this.fillDoc();
 
-      _this.docxTemplateHelper.createAndDownloadBlobFile((_this.props.fileName || 'Downloaded_') + "_" + moment$1().format('YYYY_MM_DD_HH_mm_ss'));
+      if (!skipDownload) {
+        _this.docxTemplateHelper.createAndDownloadBlobFile((_this.props.fileName || 'Downloaded_') + "_" + moment$1().format('YYYY_MM_DD_HH_mm_ss'));
+      }
 
       if (_this.props.onAfterDownload) {
         _this.props.onAfterDownload(fieldAndValues);
@@ -3317,53 +3349,15 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
     };
 
     _this.onDocDownloadFailed = function (err) {
-      console.log('err', err);
-
       _this.setState({
         isLoadingTemplateFailed: true,
         isLoading: false
       });
     };
 
-    _this.onFieldChanged = function (e, _ref) {
-      var _this$setState;
-
-      var name = _ref.name,
-          value = _ref.value;
-
-      _this.setState((_this$setState = {}, _this$setState[name] = value, _this$setState));
-    };
-
-    _this.onInsigniaSignerChanged = function (value) {
-      var valueHolders = _extends({}, _this.state.valueHolders, {
-        insigniaSigner: value
-      });
-
-      _this.setState({
-        insigniaSignerId: value.id,
-        valueHolders: valueHolders
-      });
-
-      _this.fillValueToFields(null, valueHolders, 'insigniaSigner');
-    };
-
-    _this.onStartupSignerChanged = function (value) {
-      var valueHolders = _extends({}, _this.state.valueHolders, {
-        startupSigner: value
-      });
-
-      _this.setState({
-        startupSignerId: value.id,
-        valueHolders: valueHolders
-      });
-
-      _this.fillValueToFields(null, valueHolders, 'startupSigner');
-    };
-
     _this.hookFieldGenerate = function (fieldName, value) {};
 
     _this.renderFields = function (fields) {
-      console.log('fields', fields);
       return fields.map(function (field) {
         return /*#__PURE__*/React__default.createElement(React__default.Fragment, null, /*#__PURE__*/React__default.createElement(GenerateFormField, {
           hookFieldUpdate: _this.hookFieldGenerate,
@@ -3377,9 +3371,9 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
           group: field.group_name,
           modifiedValue: field.modified_value,
           translatedValue: field.translated_value,
-          handleChangeFieldValue: function handleChangeFieldValue(e, _ref2) {
-            var name = _ref2.name,
-                value = _ref2.value;
+          handleChangeFieldValue: function handleChangeFieldValue(e, _ref) {
+            var name = _ref.name,
+                value = _ref.value;
 
             _this.onChangeFieldValue(name, value, field.translated_value);
           }
@@ -3424,7 +3418,7 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
     var content = null;
 
     if (isLoading) {
-      content = 'Loading';
+      content = /*#__PURE__*/React__default.createElement("div", null, "Loading");
     } else if (isLoadingTemplateFailed) {
       content = /*#__PURE__*/React__default.createElement(reactBootstrap.Alert, {
         variant: "danger"
@@ -3440,12 +3434,30 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
       errorFields = docFields.filter(function (field) {
         return field.modified_value === undefined && field.required === 1 && !field.translated_value || field.modified_value !== undefined && !field.modified_value && field.required === 1;
       });
-      var buttons = /*#__PURE__*/React__default.createElement(React__default.Fragment, null, !isLoading && !isLoadingTemplateFailed && /*#__PURE__*/React__default.createElement(reactBootstrap.Button, {
+      var buttons = /*#__PURE__*/React__default.createElement(React__default.Fragment, null, this.props.onClose && /*#__PURE__*/React__default.createElement(reactBootstrap.Button, {
+        className: "docx-template__btn-close",
+        disabled: isLoading,
+        color: "gray",
+        onClick: function onClick() {
+          return _this2.props.onClose();
+        }
+      }, "Close"), /*#__PURE__*/React__default.createElement("div", {
+        style: {
+          flex: 1
+        }
+      }), !isLoading && !isLoadingTemplateFailed && /*#__PURE__*/React__default.createElement(reactBootstrap.Button, {
+        className: "docx-template__btn-download",
         disabled: errorFields.length > 0 || isLoading || !this.props.canDownload,
         color: "blue",
-        onClick: this.downloadFile,
-        icon: true
-      }, "Download"), !(typeof this.props.noModal !== 'undefined') && /*#__PURE__*/React__default.createElement(reactBootstrap.Button, {
+        onClick: this.downloadFile
+      }, "Download Docx"), !isLoading && !isLoadingTemplateFailed && /*#__PURE__*/React__default.createElement(reactBootstrap.Button, {
+        className: "docx-template__btn-save",
+        disabled: isLoading,
+        color: "blue",
+        onClick: function onClick() {
+          return _this2.downloadFile(true);
+        }
+      }, "Save"), !(typeof this.props.noModal !== 'undefined') && /*#__PURE__*/React__default.createElement(reactBootstrap.Button, {
         disabled: isLoading,
         onClick: this.props.onClose
       }, ' ', "Close"));
@@ -3481,15 +3493,18 @@ var GenerateForm = /*#__PURE__*/function (_Component) {
   return GenerateForm;
 }(React.Component);
 
-var DocxTemplate = function DocxTemplate(_ref) {
+var GenerateForm$1 = React.memo(GenerateForm);
+
+var DocxTemplate = React.memo(function (_ref) {
   var url = _ref.url,
       settings = _ref.settings,
       canDownload = _ref.canDownload,
       onAfterDownload = _ref.onAfterDownload,
       injectedFieldsBefore = _ref.injectedFieldsBefore,
       injectedFieldsAfter = _ref.injectedFieldsAfter,
-      fileName = _ref.fileName;
-  return React__default.createElement(GenerateForm, {
+      fileName = _ref.fileName,
+      onClose = _ref.onClose;
+  return React__default.createElement(GenerateForm$1, {
     noModal: true,
     url: url,
     settings: settings,
@@ -3497,9 +3512,10 @@ var DocxTemplate = function DocxTemplate(_ref) {
     onAfterDownload: onAfterDownload,
     injectedFieldsBefore: injectedFieldsBefore,
     injectedFieldsAfter: injectedFieldsAfter,
-    fileName: fileName
+    fileName: fileName,
+    onClose: onClose
   });
-};
+});
 
 exports.DocxTemplate = DocxTemplate;
 //# sourceMappingURL=index.js.map

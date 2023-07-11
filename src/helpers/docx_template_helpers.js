@@ -192,6 +192,11 @@ export const FILE_TEMPLATE_FIELD_TYPES = {
     value: 'country_select',
     text: 'Country Select',
   },
+  COUNTRY_SELECT_SINGLE: {
+    key: 'country_select_single',
+    value: 'country_select_single',
+    text: 'Single Country Select',
+  },
   SINGLE_CHOICE_OPTION: {
     key: 'single_choice_option',
     value: 'single_choice_option',
@@ -364,6 +369,7 @@ class DocxTemplateHelper {
       } catch (error) {
         // Catch compilation errors (errors caused by the compilation of the template : misplaced tags)
         callbackFailed(err)
+        return
       }
 
       callbackSuccess(doc)
@@ -371,13 +377,12 @@ class DocxTemplateHelper {
   }
 
   setData = (data) => {
-    console.log('set Data', data)
     this.loadedDoc.setData(data)
     this.loadedDoc.render()
   }
 
   createAndDownloadBlobFile = (filename, extension = 'docx') => {
-    let body = this.loadedDoc.getZip().generate({ type: 'nodebuffer' })
+    let body = this.loadedDoc.getZip().generate({ type: 'blob' })
     const blob = new Blob([body])
     const fileName = `${filename}.${extension}`
     if (navigator.msSaveBlob) {

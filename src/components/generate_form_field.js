@@ -89,6 +89,7 @@ class GenerateFormField extends PureComponent {
           </Form.Label>
           {this.props.type !== FILE_TEMPLATE_FIELD_TYPES.FIXED_DATE.value &&
             this.props.type !== FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value &&
+            this.props.type !== FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT_SINGLE.value &&
             this.props.type !== FILE_TEMPLATE_FIELD_TYPES.SINGLE_CHOICE_OPTION.value && (
               <Form.Control
                 // placeholder={this.props.label}
@@ -112,23 +113,6 @@ class GenerateFormField extends PureComponent {
             />
           )}
           {this.props.type === FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT.value && (
-            // <Form>
-            //   <Form.Group controlId="my_multiselect_field">
-            //     <Form.Control as="select"
-            //       multiple
-            //       value={this.state.value ? this.state.value.split(', ') : []}
-            //       onChange={e => {
-            //         const values = [].slice.call(e.target.selectedOptions).map(item => item.value)
-            //         this.handleChangeFieldValue(e, { name: this.props.name, value: values.join(',') })
-            //       }}>
-            //         <option value={'x'}>xx</option>
-            //         <option value={'y'}>yy</option>
-            //       {COUNTRY_OPTIONS.map((c) => {
-            //         <option value={c.text}>{c.text}</option>
-            //       })} 
-            //     </Form.Control>
-            //   </Form.Group>
-            // </Form>
             <Dropdown
               className="form-control"
               // placeholder={this.props.label}
@@ -142,6 +126,22 @@ class GenerateFormField extends PureComponent {
               })}
               onChange={(e, { name, value }) => {
                 value = value.join(', ')
+                this.handleChangeFieldValue(e, { name, value })
+              }}
+            />
+          )}
+          {this.props.type === FILE_TEMPLATE_FIELD_TYPES.COUNTRY_SELECT_SINGLE.value && (
+            <Dropdown
+              className="form-control"
+              // placeholder={this.props.label}
+              value={this.state.value}
+              name={this.props.name}
+              selection
+              search
+              options={COUNTRY_OPTIONS.map((c) => {
+                return { value: c.text, text: c.text, key: c.key }
+              })}
+              onChange={(e, { name, value }) => {
                 this.handleChangeFieldValue(e, { name, value })
               }}
             />
